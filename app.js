@@ -14,6 +14,7 @@ var app = module.exports = express.createServer();
 app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
+  app.set('view options', { layout: false });
   app.use(express.logger());
   app.use(express.bodyParser());
   app.use(express.methodOverride());
@@ -30,11 +31,11 @@ app.configure('production', function(){
 });
 
 // Routes
-app.get('/userreg',function(req, res){
+app.get('/cuser',function(req, res){
     res.render('cuser', { title: 'VPOC User Registration'});
 });
 
-app.get('/userrec',function(req, res){
+app.get('/ruser',function(req, res){
     res.render('ruser', { title: 'VPOC Password Recovery'});
 });
 

@@ -1,10 +1,16 @@
-//create navigation div
-script(type='text/javascript',src='/javascripts/ruser.js')
-div(id='reg-box', class='divBox')
-	h1(class='titleH1') VPOC User Recovery
-	//align this center and put a colored background on it
-	form(class='ui-widget regForm')
-		label Username:
-		input(id='username', value='your_email@juniper.net')
-		button(id='recover') Recover
-		button(id='reset') Reset
+extends layout
+
+block append head
+  script(type='text/javascript',src='/javascripts/ruser.js')
+
+block append content
+  //create navigation div
+  div(id='reg-box', class='divBox')
+    h1(class='titleH1 ui-widget-header') VPOC User Recovery
+    //align this center and put a colored background on it
+    form(class='ui-widget regForm')
+      div(id='divusername')
+        label Username:
+        input(id='username', value='your_email@juniper.net')
+      button(id='recover') Recover
+      button(id='reset') Reset

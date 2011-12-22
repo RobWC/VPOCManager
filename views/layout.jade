@@ -1,9 +1,14 @@
 !!! 5
 html
-  head
+  block head
     title= title
     script(type='text/javascript', src='/javascripts/jquery-1.7.1.min.js')
     script(type='text/javascript', src='/javascripts/jquery-ui-1.8.16.custom.min.js')
+    script(type='text/javascript', src='/javascripts/jquery.qtip.min.js')
+    script(type='text/javascript', src='/javascripts/common-helper.js')
     link(rel='stylesheet',type='text/css',href='/stylesheets/vader/jquery-ui-1.8.16.custom.css')
     link(rel='stylesheet', href='/stylesheets/style.css')
-  body!= body
+    link(rel='stylesheet', href='/stylesheets/jquery.qtip.css')
+ block body
+    div(id='header')
+    block content

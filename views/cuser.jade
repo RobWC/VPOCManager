@@ -1,38 +1,48 @@
-//create navigation div
-script(type='text/javascript',src='/javascripts/cuser.js')
-div(id='reg-box', class='divBox')
-	h1(class='titleH1') VPOC User Registration
-	//align this center and put a colored background on it
-	form(class='ui-widget regForm')
-		label Username:
-		input(id='username', value='your_email@juniper.net')
-		label Password:
-		input(id='password',type='password')
-		label Password (Confirm):
-		input(id='password',type='password')
-		label First Name:
-		input(id='firstname')
-		label Last Name:
-		input(id='lastname')
-		label Contact Number:
-		input(id='contactnum')
-		label Region:
-		select
-			option(value='US/Canada') US/Canada
-			option(value='LATAM') LATAM
-			option(value='EMEA') EMEA
-			option(value='APAC') APAC
-			option(value='HQ') HQ
-		label Position:
-		select
-			option(value='SE') SE
-			option(value='CSE') CSE
-			option(value='Specialist') Specialist
-			option(value='SEM/SED') SEM/SED
-			option(value='PLM') PLM
-			option(value='PLE') PLE
-			option(value='TME') TME
-			option(value='Other HQ') Other HQ
-			option(value='Other Field') Other Field
-		button(id='register') Register
-		button(id='reset') Reset
+extends layout
+
+block append head
+	script(type='text/javascript',src='/javascripts/cuser.js')
+
+block append content
+	//create navigation div
+	div(id='reg-box', class='divBox')
+		h1(class='titleH1 ui-widget-header') VPOC User Registration
+		//align this center and put a colored background on it
+		form(class='ui-widget regForm')
+			div(id='divusername')
+				label Username:
+				input(id='username', value='your_email@juniper.net')
+			div(id='divpassword')
+				label Password:
+				input(id='pass',type='password')
+			div(id='divpasscon')
+				label Password (Confirm):
+				input(id='passcon',type='password')
+			div(id='divfirstname')
+				label First Name:
+				input(id='firstname')
+			div(id='divlastname')
+				label Last Name:
+				input(id='lastname')
+			div(id='divregion')
+				label Region:
+				select(id='region')
+					option(value='US/Canada') US/Canada
+					option(value='LATAM') LATAM
+					option(value='EMEA') EMEA
+					option(value='APAC') APAC
+					option(value='HQ') HQ
+			div(id='position')
+				label Position:
+				select
+					option(value='SE') SE
+					option(value='CSE') CSE
+					option(value='Specialist') Specialist
+					option(value='SEM/SED') SEM/SED
+					option(value='PLM') PLM
+					option(value='PLE') PLE
+					option(value='TME') TME
+					option(value='Other HQ') Other HQ
+					option(value='Other Field') Other Field
+			button(id='register') Register
+			button(id='reset') Reset
