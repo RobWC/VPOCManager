@@ -5,7 +5,7 @@
 
 var express = require('express');
 var email = require('mailer');
-//  , routes = require('./routes')
+var crypto = require('crypto');
 
 var app = module.exports = express.createServer();
 
@@ -15,7 +15,7 @@ app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.set('view options', { layout: false });
-  app.use(express.logger());
+  //app.use(express.logger());
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(app.router);
@@ -33,6 +33,38 @@ app.configure('production', function(){
 // Routes
 app.get('/cuser',function(req, res){
     res.render('cuser', { title: 'VPOC User Registration'});
+});
+
+app.post('/cuser',function(req,res){
+	var postData = req.body
+	//grab data
+	//validate that passwords match
+	//validate that email is correct and meets rules
+	//create user account in Mongo
+	//send validation email
+	//create user in AD post validation email
+	var dateObj = new Date();
+	
+	var userData = {
+			username = postData.username,
+			password = postData.password,
+			passcon = postData.passcon,
+			firstname = postData.firstname,
+			lastname = postData.lastname,
+			region = postData.region,
+			position = postData.position,
+			salt = (dateObj.getTime() % 42) * dateObj.getTime(),
+			passHash = '',
+			passHashType = 'sha1'
+	};
+	
+	if (userData.password == userData.passcon) {
+		var shasum = crypto.createHash('sha1');
+		shasum.update(userData.password);
+		userData.passHash = shasum.digest('hex');
+	};
+	
+	console.log(postData);
 });
 
 app.get('/ruser',function(req, res){

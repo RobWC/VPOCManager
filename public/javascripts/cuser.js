@@ -40,6 +40,24 @@ $(document).ready(function(){
           if (!!$('input#username').val() || !!$('input#pass').val() || !!$('input#passcon').val() || !!$('input#firstname').val() || !!$('input#lastname').val()) {
             console.log('workin');
             //send data to API
+            var request = $.ajax({
+              url: "/cuser",
+              type: "POST",
+              data: {
+                username: $('input#username').val(),
+                password: $('input#pass').val(),
+                passcon: $('input#passcon').val(),
+                firstname: $('input#firstname').val(),
+                lastname: $('input#lastname').val(),
+                region: $('select#region').val(),
+                position: $('select#position').val()
+              },
+              dataType: "json"
+            });
+          
+            request.done(function(msg) {
+              console.log(msg);
+            });
           };
         };
     };
