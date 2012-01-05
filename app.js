@@ -6,6 +6,8 @@
 var express = require('express');
 var email = require('mailer');
 var crypto = require('crypto');
+var mongodb = require('mongodb');
+
 
 var app = module.exports = express.createServer();
 
@@ -42,29 +44,30 @@ app.post('/cuser',function(req,res){
 	//validate that email is correct and meets rules
 	//create user account in Mongo
 	//send validation email
-	//create user in AD post validation email
-	var dateObj = new Date();
-	
-	var userData = {
-			username = postData.username,
-			password = postData.password,
-			passcon = postData.passcon,
-			firstname = postData.firstname,
-			lastname = postData.lastname,
-			region = postData.region,
-			position = postData.position,
-			salt = (dateObj.getTime() % 42) * dateObj.getTime(),
-			passHash = '',
-			passHashType = 'sha1'
+	//create user in AD post validation email	
+	//grab user date from the post
+	console.log(postData.username);
+	var user = new User(postData.username,postData.email,postData.password,postData.passcon,postData.firstname,postData.lastname,postData.region,postData.position);
+
+	var callback = function(result) {
+		if (result) {
+			console.log('success');
+		} else {
+			console.log('crap');
+		};
+		var passResult = user.hashPassword();
+		console.log(result);
+		console.log(user);
+		if (passResult) {
+				user.saveUser();
+		} else {
+			console.log('unable to save');
+		};
 	};
 	
-	if (userData.password == userData.passcon) {
-		var shasum = crypto.createHash('sha1');
-		shasum.update(userData.password);
-		userData.passHash = shasum.digest('hex');
-	};
 	
-	console.log(postData);
+	user.validateEmail(callback);
+	
 });
 
 app.get('/ruser',function(req, res){
@@ -77,6 +80,7 @@ app.get('/',function(req, res){
 
 
 app.listen(3000);
+var dbConn = new mongodb.Db('vpoc', new mongodb.Server('127.0.0.1',27017, {}), {native_parser: false});
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 
 //helper classes here https://github.com/Marak/node_mailer
@@ -103,3 +107,109 @@ Messager.prototype = {
 	},
 	previewMessage: function() {}
 }
+
+function User(username,emailAddress,password,passcon,firstname,lastname,region,position) {
+	this.username = username;
+	this.emailAddress = emailAddress;
+	this.password = password;
+	this.passcon = passcon;
+	this.firstname = firstname;
+	this.lastname = lastname;
+	this.region = region;
+	this.position = position;
+	this.salt = ((new Date().getTime() % 42) * new Date().getTime() * 414243).toString(16); 
+	this.passHash = '';
+	this.passHashType = 'sha1';
+};
+
+User.prototype = {
+	constructor: User,
+	validateEmail: function(callback) {
+		//check that the email domain is acceptable
+		//connect to mongodb
+		//grab all vpoc.accepteddomains with the domainType email
+		//loop until a match is made
+		//if match return true
+		//if no match return false
+			var emailDomain = this.emailAddress.split('@',2)[1];
+			console.log(emailDomain);
+		if (!!emailDomain) {
+			dbConn.open(function(err,db) {
+				if (err) {
+					console.log('error' + err);
+				};
+				db.collection('accepteddomains', function(err,collection) {
+					collection.findOne({domainType: 'email',domainName: emailDomain},function(err,doc) {
+						console.log(doc);
+						console.log(doc.domainName + ' ' + emailDomain);
+						if (emailDomain == doc.domainName) {
+							callback(true);
+						} else { 
+							callback(false);
+						};
+					});
+				});
+			});
+		} else {
+			console.log('Email Domain not found');
+			return false;
+		};
+	},
+	saveUser: function() {
+		var self = this;
+		console.log();
+		dbConn.open(function(err,db) {
+			db.collection('users', function(err,collection){
+				collection.insert(self.toObject(),{safe: true}, function(err,records){
+					if(!!records) {
+						console.log('recordID ' + records[0]._id);
+					} else {
+						//some error occured
+					};
+				});
+			});
+		});
+	},
+	hashPassword: function() {
+		if (this.password == this.passcon) {
+			var shasum = crypto.createHash('sha1');
+			shasum.update(this.salt + this.password);
+			this.passHash = shasum.digest('hex');
+			return true;
+		} else {
+			return false;
+		};
+	},
+	toObject: function() {
+		var doc = {
+			username: this.username,
+			emailAddress: this.emailAddress,
+			password: this.password,
+			passcon: this.passcon,
+			firstname: this.firstname,
+			lastname: this.lastname,
+			region: this.region,
+			position: this.position,
+			salt: this.salt,
+			passHash: this.passHash,
+			passHashType: this.passHashType
+		};
+		return doc;
+	}
+};
+
+/*
+if (err) {
+							console.log(err);
+						};
+						console.log('find');
+						console.log(cursor);
+						cursor.each(function(err,doc) {
+								if (err) {
+									console.log(err);
+								};						
+								if (emailDomain == doc.domainName) {
+									console.log('match');
+								} else {
+									console.log('fail');
+								}; */

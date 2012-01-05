@@ -24,12 +24,12 @@ $(document).ready(function(){
       displayInfo('#divpassword','Your passwords must match!');
       } else {
         console.log('to username');
-        if ($('input#username').val().split('@')[1] != 'juniper.net') {
+        if ($('input#email').val().split('@')[1] != 'juniper.net') {
           //check this server side as well
-          displayInfo('#divusername','You must use a @junper.net email address!');
-        } else if ( $('input#username').val() == 'your_email@juniper.net') { 
+          displayInfo('#divemail','You must use a @junper.net email address!');
+        } else if ( $('input#email').val() == 'your_email@juniper.net') { 
             //hey use your own username
-            displayInfo('#divusername','Please enter your own email address!');
+            displayInfo('#divemail','Please enter your own email address!');
         } else {
           if (!$('input#firstname').val()) {
             displayInfo('#divfirstname','Please enter your first name!');
@@ -37,7 +37,7 @@ $(document).ready(function(){
           if (!$('input#lastname').val()) {
             displayInfo('#divlastname','Please enter your first name!');
           };
-          if (!!$('input#username').val() || !!$('input#pass').val() || !!$('input#passcon').val() || !!$('input#firstname').val() || !!$('input#lastname').val()) {
+          if (!!$('input#email').val() || !!$('input#username').val() || !!$('input#pass').val() || !!$('input#passcon').val() || !!$('input#firstname').val() || !!$('input#lastname').val()) {
             console.log('workin');
             //send data to API
             var request = $.ajax({
@@ -45,6 +45,7 @@ $(document).ready(function(){
               type: "POST",
               data: {
                 username: $('input#username').val(),
+                email:  $('input#email').val(),
                 password: $('input#pass').val(),
                 passcon: $('input#passcon').val(),
                 firstname: $('input#firstname').val(),

@@ -1,0 +1,6 @@
+vpoc.accepteddomains
+db.accepteddomains.ensureIndex({domainName:1},{unique:true});
+
+_id
+domainName (email domain name after the @)
+domainType (list what the domain name means, in this case its email)
