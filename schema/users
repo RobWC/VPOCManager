@@ -1,5 +1,6 @@
-vpoc.accepteddomains
-db.users.ensureIndex({username:1,emailAddress:1},{unique:true});
+vpoc.users
+db.users.ensureIndex({emailAddress:1},{unique:true});
+db.users.ensureIndex({username:1},{unique:true});
 
 { _id
   username: 'rwcameron',

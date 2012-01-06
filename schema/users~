@@ -1,0 +1,15 @@
+vpoc.accepteddomains
+db.users.ensureIndex({username:1,emailAddress:1},{unique:true});
+
+{ _id
+  username: 'rwcameron',
+  emailAddress: 'rcameron@juniper.net',
+  password: '123123',
+  passcon: '123123',
+  firstname: 'Rob',
+  lastname: 'Cameron',
+  region: 'US/Canada',
+  position: 'SE',
+  salt: '130d9e2852b718000',
+  passHash: '81451c5c52ea2c1d944a3358130d1626be41f353',
+  passHashType: 'sha1' }
