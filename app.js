@@ -71,14 +71,58 @@ app.post('/cuser', function (req, res) {
         response: response
       }
       var message = user.saveUser(options);
+      //send email to user
     } else {
       console.log('unable to save');
     };
   };
-
-
   user.validateEmail(options);
 
+});
+
+app.get('/validate/:emailCode', function(req,res,next){
+	console.log(req.params.emailCode);
+	//security check email code
+	dbConn.open(function (err, db) {
+      db.collection('users', function (err, collection) {
+        collection.find({emailVerificationCode:req.params.emailCode}).toArray(function(err,results){
+	       if (err) {
+	       	console.log(err);	
+	       } else {
+	       	if (results.length == 1) {
+	       		var userDocument = 
+	       		console.log(results);
+	       		
+	       	} else if (results.length > 1) {
+	       		//weird two matching email codes
+	       	} else {
+	       		//no results found
+	       	};
+	       }
+        	});
+    });
+ });
+        	/*
+        collection.insert(self.toObject(), { safe: true }, function (err, records) {
+          if (err) {
+            console.log(err);
+            if (err.code == 11000) {
+              var errMessage = new ResponseMessage('Username or Email ' + err.key + ' already in use', 11000, 'error');
+              errMessage.sendMessage(options.response);
+            };
+          } else {
+            if ( !! records) {
+              console.log('recordID ' + records[0]._id);
+            } else {
+              //some error occured
+            };
+          };
+        });
+      });*/
+	//grab the email code
+	//search the db for the code
+	//if matched then activate account and give a positive back
+	//if not matched then return error not found
 });
 
 app.get('/ruser', function (req, res) {
@@ -125,7 +169,7 @@ Messager.prototype = {
   previewMessage: function () {}
 }
 
-function User(username, emailAddress, password, passcon, firstname, lastname, region, position) {
+function User(username, emailAddress, password, passcon, firstname, lastname, region, position, emailVerificationCode, accountStatus) {
   this.username = username;
   this.emailAddress = emailAddress;
   this.password = password;
@@ -137,6 +181,8 @@ function User(username, emailAddress, password, passcon, firstname, lastname, re
   this.salt = ((new Date().getTime() % 42) * new Date().getTime() * 414243).toString(16);
   this.passHash = '';
   this.passHashType = 'sha1';
+  this.emailVerificationCode = ((new Date().getTime() % 42) * new Date().getTime() * 7676).toString(24);
+  this.accountStatus = 'activate'; //activate, closed, active, suspended
 };
 
 User.prototype = {
@@ -183,27 +229,24 @@ User.prototype = {
         collection.insert(self.toObject(), { safe: true }, function (err, records) {
           if (err) {
             console.log(err);
-
             if (err.code == 11000) {
-
               var errMessage = new ResponseMessage('Username or Email ' + err.key + ' already in use', 11000, 'error');
-
               errMessage.sendMessage(options.response);
-
             };
-
           } else {
-
             if ( !! records) {
               console.log('recordID ' + records[0]._id);
             } else {
               //some error occured
             };
-
           };
         });
       });
     });
+  },
+  generateEmailCode: function(options) {
+  	this.emailVerificationCode = ((new Date().getTime() % 42) * new Date().getTime() * 7676).toString(24);
+  	return true;
   },
   hashPassword: function (options) {
     if (this.password == this.passcon) {
@@ -227,12 +270,13 @@ User.prototype = {
       position: this.position,
       salt: this.salt,
       passHash: this.passHash,
-      passHashType: this.passHashType
+      passHashType: this.passHashType,
+      emailVerificationCode: this.emailVerificationCode,
+      accountStatus: this.accountStatus
     };
     return doc;
   }
 };
-
 
 function ResponseMessage(message, code, messageType) {
   this.message = message;

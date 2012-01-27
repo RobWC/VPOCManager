@@ -13,4 +13,9 @@ db.users.ensureIndex({username:1},{unique:true});
   position: 'SE',
   salt: '130d9e2852b718000',
   passHash: '81451c5c52ea2c1d944a3358130d1626be41f353',
-  passHashType: 'sha1' }
+  passHashType: 'sha1',
+  emailVerificationCode:xxxx,
+  accountStatus: activate 
+ }
+ 
+ accountStatus: ['pending-activation', 'closed', 'suspended', 'active',]
