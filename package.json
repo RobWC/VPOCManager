@@ -1,11 +1,11 @@
 {
-    "name": "application-name"
-  , "version": "0.0.1"
+    "name": "UserManager"
+  , "version": "0.0.4"
   , "private": true
   , "dependencies": {
       "express": "2.5.2"
     , "jade": ">= 0.0.1"
-    , "mailer": ">= 0.6.7"
+    , "nodemailer": ">=0.2.4"
     , "mongodb": ">=0.9.7-2-5"
     , "redis": ">=0.1"
     , "connect-redis": ">=1.2.0"

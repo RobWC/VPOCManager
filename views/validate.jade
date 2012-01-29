@@ -1,0 +1,14 @@
+extends layout
+
+block append head
+  script(type='text/javascript',src='/javascripts/validate.js')
+
+block append content
+  //create navigation div
+  div(id='reg-box', class='divBox')
+    h1(class='titleH1 ui-widget-header') VPOC User Validation
+    //align this center and put a colored background on it
+    form(class='ui-widget regForm')
+      div(id='result')
+        p= resultMessage
+      button(id='continue') Back to Login

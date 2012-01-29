@@ -2,9 +2,20 @@
  * Module dependencies.
  */
 var express = require('express');
-var email = require('mailer');
+var nodemailer = require('nodemailer');
 var crypto = require('crypto');
 var mongodb = require('mongodb');
+
+//setup mail settings
+ nodemailer.SMTP = {
+ 	host: 'localhost',
+ 	port: 2525,
+ 	use_authentication: false,
+ 	ssl: false,
+ 	user: '',
+ 	pass: '',
+ 	debug: true
+ };
 
 
 var app = module.exports = express.createServer();
@@ -74,10 +85,11 @@ app.post('/cuser', function (req, res) {
       //send email to user
     } else {
       console.log('unable to save');
+      var errMessage = new ResponseMessage('Unable to create user, contact support', 500, 'error');
+      errMessage.sendMessage(options.response);
     };
   };
   user.validateEmail(options);
-
 });
 
 app.get('/validate/:emailCode', function(req,res,next){
@@ -85,18 +97,38 @@ app.get('/validate/:emailCode', function(req,res,next){
 	//security check email code
 	dbConn.open(function (err, db) {
       db.collection('users', function (err, collection) {
-        collection.find({emailVerificationCode:req.params.emailCode}).toArray(function(err,results){
+        collection.find({emailVerificationCode:req.params.emailCode,accountStatus:'activate'}).toArray(function(err,results){
 	       if (err) {
 	       	console.log(err);	
 	       } else {
 	       	if (results.length == 1) {
-	       		var userDocument = 
-	       		console.log(results);
-	       		
+	       		var userDocument = results[0];
+	       		console.log(userDocument);
+	       		//update document
+	       		collection.update({_id: userDocument._id}, {$set: {accountStatus: "active"}},function(err,count){
+	       			if (err) {
+							//handle error
+							console.log(err);
+	       			} else {
+	       				console.log(count);
+	       				//return success message
+	       				var retMessage = new ResponseMessage('User successfully activated', 200, 'success');
+	       					res.render('validate', {
+									title: ' Validation',
+									resultMessage: retMessage.toObject().message
+								});
+	       			};
+	       		});
 	       	} else if (results.length > 1) {
-	       		//weird two matching email codes
+	       		//weird two matching email codes, this should never happen
+	       		console.log('Validation code collision');
 	       	} else {
-	       		//no results found
+	       	  //no results found throw an error
+	       	  var retMessage = new ResponseMessage('Invalid activation attempt', 200, 'success');
+     			  res.render('validate', {
+  				  title: ' Validation',
+                resultMessage: retMessage.toObject().message
+  				  });
 	       	};
 	       }
         	});
@@ -145,20 +177,42 @@ var dbConn = new mongodb.Db('vpoc', new mongodb.Server('127.0.0.1', 27017, {}), 
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 
 //helper classes here https://github.com/Marak/node_mailer
-function Messager(type, mailTo, mailFrom) {
+function Messager(mailType, mailTo, humanName,emailCode) {
   //mail types - recover, registration
-  this.type = type;
+  this.mailType = mailType; //register, recover
   this.mailTo = mailTo;
-  this.mailFrom = mailFrom;
+  this.humanName = humanName;
+  this.emailCode = emailCode;
+  this.mailFrom = 'useradmin@virtualpoc.net';
+  this.subject = '';
+  this.body = '';
+  this.domain = 'virtualpoc.net';
 };
 
 Messager.prototype = {
   constructor: Messager,
   constructMessage: function () {
-    //fill in template
+    //fill in template based on type
+    var self = this;
+        
+    if (this.mailType == 'register') {
+      this.subject = 'Welcome to the VirtualPOC!';
+      this.body = 'Dear ' + self.humanName + 'Thank you for registering to use the VirtualPOC at Juniper Networks. Please click on the link below to complete the activation of your account. Once activated you will be able to access the VPOC and begin using the tool. Activation Link: http://www.virtualpoc.net/validate/' + self.emailCode + ' If you have any questions please contact us a vpoc-support@juniper.net';
+    } else if (this.mailType == 'recover') {
+      //text for recovery
+    }
   },
   sendMessage: function () {
+    var self = this;
     //send message
+    nodemailer.send_mail({
+    	sender: self.mailFrom,
+    	to: self.mailTo,
+    	subject: self.subject,
+    	body: self.body
+    },function(error,success) {
+    	console.log('Message ' + success ? 'sent' : 'failed');
+    });
   },
   resetMessage: function () {
     //delete all properties
@@ -234,8 +288,13 @@ User.prototype = {
               errMessage.sendMessage(options.response);
             };
           } else {
-            if ( !! records) {
+            if (!!records) {
               console.log('recordID ' + records[0]._id);
+              //send validation email
+               var newMail = new Messager('register', self.emailAddress, self.firstname, self.emailVerificationCode);
+			      newMail.constructMessage();
+			      newMail.sendMessage();
+			      console.log(newMail);
             } else {
               //some error occured
             };
