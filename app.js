@@ -10,10 +10,10 @@ var mongodb = require('mongodb');
  nodemailer.SMTP = {
  	host: 'localhost',
  	port: 2525,
- 	use_authentication: false,
+ 	use_authentication: true,
  	ssl: false,
- 	user: '',
- 	pass: '',
+ 	user: 'mailer',
+ 	pass: 'bigcrapper',
  	debug: true
  };
 
